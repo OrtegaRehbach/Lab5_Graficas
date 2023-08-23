@@ -1,16 +1,16 @@
 #include "RenderingUtils.h"
 
-void drawPoint(SDL_Renderer* renderer, const glm::vec3& position, const Color& color) {
+void drawPoint(SDL_Renderer* renderer, float x_position, float y_position, const Color& color) {
     // Get Screen dimensions for coordinate adjustment
     int SCREEN_WIDTH;
     int SCREEN_HEIGHT;
     SDL_GetRendererOutputSize(renderer, &SCREEN_WIDTH, &SCREEN_HEIGHT);
     
     SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, SDL_ALPHA_OPAQUE);
-    SDL_RenderDrawPoint(renderer, static_cast<int>(position.x), SCREEN_HEIGHT - static_cast<int>(position.y));
+    SDL_RenderDrawPoint(renderer, static_cast<int>(x_position), SCREEN_HEIGHT - static_cast<int>(y_position));
 }
 
-void drawLine(SDL_Renderer* renderer, const glm::vec3& start, const glm::vec3& end, const Color& color) {
+std::vector<Fragment> drawLine(const glm::vec3& start, const glm::vec3& end, const Color& color) {
     int x0 = static_cast<int>(start.x);
     int y0 = static_cast<int>(start.y);
     int x1 = static_cast<int>(end.x);
@@ -22,12 +22,12 @@ void drawLine(SDL_Renderer* renderer, const glm::vec3& start, const glm::vec3& e
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx - dy;
 
+    std::vector<Fragment> lineFragments;
+
     while (true) {
-        drawPoint(renderer, glm::vec3(x0, y0, 0.0f), color);
+        lineFragments.push_back(Fragment(x0, y0));
 
-        if (x0 == x1 && y0 == y1)
-            break;
-
+        if (x0 == x1 && y0 == y1) break;
         int e2 = 2 * err;
         if (e2 > -dy) {
             err -= dy;
@@ -38,12 +38,40 @@ void drawLine(SDL_Renderer* renderer, const glm::vec3& start, const glm::vec3& e
             y0 += sy;
         }
     }
+
+    return lineFragments;
 }
 
-void drawTriangle(SDL_Renderer* renderer, const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& pointC, const Color& color) {
-    drawLine(renderer, pointA, pointB, color);
-    drawLine(renderer, pointB, pointC, color);
-    drawLine(renderer, pointC, pointA, color);
+std::vector<Fragment> drawTriangle(const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& pointC, const Color& color) {
+    std::vector<Fragment> triangleFragments;
+    
+    std::vector<Fragment> lineAB = drawLine(pointA, pointB);
+    std::vector<Fragment> lineBC = drawLine(pointB, pointC);
+    std::vector<Fragment> lineCA = drawLine(pointC, pointA);
+
+    triangleFragments.insert(
+        triangleFragments.end(),
+        lineAB.begin(),
+        lineAB.end()
+    );
+
+    triangleFragments.insert(
+        triangleFragments.end(),
+        lineBC.begin(),
+        lineBC.end()
+    );
+
+    triangleFragments.insert(
+        triangleFragments.end(),
+        lineCA.begin(),
+        lineCA.end()
+    );
+
+    return triangleFragments;
+}
+
+std::vector<Fragment> drawTriangle(const std::vector<glm::vec3>& triangle, const Color& color) {
+    return drawTriangle(triangle[0], triangle[1], triangle[2], color);
 }
 
 std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, const std::vector<Face>& faces) {
@@ -67,4 +95,32 @@ std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, con
     }
 
     return vertexArray;
+}
+
+std::vector<std::vector<glm::vec3>> primitiveAssembly (const std::vector<glm::vec3>& transformedVertices) {
+    // Group your vertices in groups of 3
+    std::vector<std::vector<glm::vec3>> assembledVertices;
+
+    for (int i = 0; i < transformedVertices.size() - 1; i += 3) {
+        std::vector<glm::vec3> vertexGroup;
+        vertexGroup.push_back(transformedVertices[i]);
+        vertexGroup.push_back(transformedVertices[i + 1]);
+        vertexGroup.push_back(transformedVertices[i + 2]);
+
+        assembledVertices.push_back(vertexGroup);
+    }
+    
+    // Return your assembled vertices
+    return assembledVertices;
+}
+
+std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assembledVertices) {
+    std::vector<Fragment> fragments;
+
+    for (const std::vector<glm::vec3>& triangleVertices : assembledVertices) {
+        std::vector<Fragment> triangleFragments = drawTriangle(triangleVertices[0], triangleVertices[1], triangleVertices[2]);
+        fragments.insert(fragments.end(), triangleFragments.begin(), triangleFragments.end());
+    }
+
+    return fragments;
 }

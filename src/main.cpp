@@ -6,6 +6,7 @@
 #include "Face.h"
 #include "Uniform.h"
 #include "RenderingUtils.h"
+#include "Shaders.h"
 
 
 const int SCREEN_WIDTH = 800;
@@ -21,7 +22,7 @@ bool init() {
         return false;
     }
 
-    window = SDL_CreateWindow("Render Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Render Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     return true;
@@ -32,11 +33,34 @@ void clear() {
     SDL_RenderClear(renderer);
 }
 
-void render() {
+void render(std::vector<glm::vec3> vertices) {
     // 1. Vertex Shader
+    std::vector<glm::vec3> transformedVertices;
+    for (glm::vec3 vertex : vertices) {
+        glm::vec3 transformedVertex = vertexShader(vertex);
+        transformedVertices.push_back(transformedVertex);
+    }
+
     // 2. Primitive Assembly
+    std::vector<std::vector<glm::vec3>> triangles = primitiveAssembly(transformedVertices);
+
     // 3. Rasterization
+    std::vector<Fragment> fragments;
+    for (std::vector<glm::vec3> triangle : triangles) {
+        std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0], triangle[1], triangle[2]);
+
+        fragments.insert(
+            fragments.end(),
+            rasterizedTriangle.begin(),
+            rasterizedTriangle.end()
+        );
+    }
+
     // 4. Fragment Shader
+    for (Fragment fragment : fragments) {
+        Color fragmentColor = fragmentShader(fragment);
+        drawPoint(renderer, fragment.x, fragment.y, fragmentColor);
+    }
 }
 
 std::vector<glm::vec3> transformVertexArray(const std::vector<glm::vec3>& vertexArray, float scale, const int offset_x = SCREEN_WIDTH / 2, const int offset_y = SCREEN_HEIGHT / 2) {
@@ -53,19 +77,6 @@ std::vector<glm::vec3> transformVertexArray(const std::vector<glm::vec3>& vertex
     return transformedArray;
 }
 
-void renderOBJ(std::vector<glm::vec3>& vertexArray) {
-    for (int i = 0; i < vertexArray.size() - 1; i += 3) {
-        glm::vec3 pointA = vertexArray[i];
-        glm::vec3 pointB = vertexArray[i + 1];
-        glm::vec3 pointC = vertexArray[i + 2];
-
-        drawTriangle(renderer, pointA, pointB, pointC, Color(255, 255, 255));
-        // drawPoint(renderer, pointA);
-        // drawPoint(renderer, pointB);
-        // drawPoint(renderer, pointC);
-    }    
-}
-
 void printVertexArray(const std::vector<glm::vec3>& vertexArray) {
     std::cout << "Vertex Array Contents:" << std::endl;
     for (const glm::vec3& vertex : vertexArray) {
@@ -78,12 +89,12 @@ int main() {
     if (!init()) { return 1; }
     
     // Read from .obj file and store the vertices/faces
-    std::vector<Vertex> vertices;
+    std::vector<Vertex> vertices_;
     std::vector<Face> faces;
 
     bool loadModel = false;
     if (loadModel) {
-        if (!ObjLoader::LoadObj("../Lab3_Ship.obj", vertices, faces)) {
+        if (!ObjLoader::LoadObj("../Lab3_Ship.obj", vertices_, faces)) {
             SDL_Log("Failed to load .obj file.");
             return 1;
         } else {
@@ -109,8 +120,8 @@ int main() {
     glm::mat4 projection = glm::mat4(1);
 
     uniforms.model = model;
-    uniforms.model = view;
-    uniforms.model = projection;
+    uniforms.view = view;
+    uniforms.projection = projection;
 
     // Render loop
     bool quit = false;
@@ -126,8 +137,7 @@ int main() {
         clear();
 
         // Call render() function
-        render();
-        // renderOBJ(transformedVertexArray);
+        render(vertices);
         
         SDL_RenderPresent(renderer);
 
