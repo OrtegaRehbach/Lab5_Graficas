@@ -124,3 +124,35 @@ std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assem
 
     return fragments;
 }
+
+glm::mat4 createModelMatrix(float scale) {
+    glm::mat4 modelMatrix = glm::mat4(1);
+    return modelMatrix;
+}
+
+glm::mat4 createViewMatrix() {
+    // glm::mat4 viewMatrix = glm::lookAt(camera.targetPosition, camera.cameraPosition, camera.upVector);
+    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    return viewMatrix;
+}
+
+glm::mat4 createProjectionMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+  float fovInDegrees = 45.0f;
+  float aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+  float nearClip = 0.1f;
+  float farClip = 100.0f;
+
+  return glm::perspective(glm::radians(fovInDegrees), aspectRatio, nearClip, farClip);
+}
+
+glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT) {
+    glm::mat4 viewport = glm::mat4(1.0f);
+
+    // Scale
+    viewport = glm::scale(viewport, glm::vec3(SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f, 0.5f));
+
+    // Translate
+    viewport = glm::translate(viewport, glm::vec3(1.0f, 1.0f, 0.5f));
+
+    return viewport;
+}

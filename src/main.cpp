@@ -33,11 +33,11 @@ void clear() {
     SDL_RenderClear(renderer);
 }
 
-void render(std::vector<glm::vec3> vertices) {
+void render(std::vector<glm::vec3> vertices, Uniforms& uniforms) {
     // 1. Vertex Shader
     std::vector<glm::vec3> transformedVertices;
     for (glm::vec3 vertex : vertices) {
-        glm::vec3 transformedVertex = vertexShader(vertex);
+        glm::vec3 transformedVertex = vertexShader(vertex, uniforms).position;
         transformedVertices.push_back(transformedVertex);
     }
 
@@ -94,7 +94,7 @@ int main() {
 
     bool loadModel = true;
     if (loadModel) {
-        if (!ObjLoader::LoadObj("../Lab3_Ship.obj", vertices_, faces)) {
+        if (!ObjLoader::LoadObj("../models/model.obj", vertices_, faces)) {
             SDL_Log("Failed to load .obj file.");
             return 1;
         } else {
@@ -102,26 +102,36 @@ int main() {
         }
     }
 
-    // std::vector<glm::vec3> vertexArray = setupVertexArray(vertices, faces);
-    // std::vector<glm::vec3> transformedVertexArray = transformVertexArray(vertexArray, 30.0f);
+    std::vector<glm::vec3> vertexArray = setupVertexArray(vertices_, faces);
+    std::vector<glm::vec3> transformedVertexArray = transformVertexArray(vertexArray, 50.0f);
 
     // printVertexArray(transformedVertexArray);
 
     std::vector<glm::vec3> vertices = {
-        {300.0f, 200.0f, 0.0f},
-        {400.0f, 400.0f, 0.0f},
-        {500.0f, 200.0f, 0.0f}
+        {0.0f, 1.0f, 0.0f},
+        {-0.87f, -0.5f, 0.0f},
+        {0.87f, -0.5f, 0.0f},
+        
+        {0.0f, 1.0f, 0.5f},
+        {-0.87f, -0.5f, 0.5f},
+        {0.87f, -0.5f, 0.5f}
     };
 
     Uniforms uniforms;
 
-    glm::mat4 model = glm::mat4(1);
-    glm::mat4 view = glm::mat4(1);
-    glm::mat4 projection = glm::mat4(1);
+    // glm::mat4 model = glm::mat4(1);
+    // glm::mat4 view = glm::mat4(1);
+    // glm::mat4 projection = glm::mat4(1);
+
+    glm::mat4 model = createModelMatrix(1.5f);
+    glm::mat4 view = createViewMatrix();
+    glm::mat4 projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
+    glm::mat4 viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     uniforms.model = model;
     uniforms.view = view;
     uniforms.projection = projection;
+    uniforms.viewport = viewport;
 
     // Render loop
     bool quit = false;
@@ -137,7 +147,7 @@ int main() {
         clear();
 
         // Call render() function
-        render(vertices);
+        render(vertices, uniforms);
         
         SDL_RenderPresent(renderer);
 

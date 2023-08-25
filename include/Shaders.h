@@ -4,7 +4,8 @@
 #include "Uniform.h"
 #include "Color.h"
 #include "Fragment.h"
+#include "Vertex.h"
 
-// glm::vec3 vertexShader(const glm::vec3& vertex, const Uniforms& uniforms);
-glm::vec3 vertexShader(const glm::vec3& vertex);
+Vertex vertexShader(const Vertex& vertex, const Uniforms& uniforms);
+Vertex vertexShader(const Vertex& vertex);
 Color fragmentShader(const Fragment& fragment);
