@@ -92,7 +92,7 @@ int main() {
     std::vector<Vertex> vertices_;
     std::vector<Face> faces;
 
-    bool loadModel = false;
+    bool loadModel = true;
     if (loadModel) {
         if (!ObjLoader::LoadObj("../Lab3_Ship.obj", vertices_, faces)) {
             SDL_Log("Failed to load .obj file.");
