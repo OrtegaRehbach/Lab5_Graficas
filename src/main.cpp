@@ -14,6 +14,7 @@ const int SCREEN_HEIGHT = 600;
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
+Uniforms uniforms;
 
 
 bool init() {
@@ -33,21 +34,21 @@ void clear() {
     SDL_RenderClear(renderer);
 }
 
-void render(std::vector<glm::vec3> vertices, Uniforms& uniforms) {
+void render(std::vector<glm::vec3> vertices) {
     // 1. Vertex Shader
-    std::vector<glm::vec3> transformedVertices;
+    std::vector<Vertex> transformedVertices;
     for (glm::vec3 vertex : vertices) {
-        glm::vec3 transformedVertex = vertexShader(vertex, uniforms).position;
+        Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
     }
 
     // 2. Primitive Assembly
-    std::vector<std::vector<glm::vec3>> triangles = primitiveAssembly(transformedVertices);
+    std::vector<std::vector<Vertex>> triangles = primitiveAssembly(transformedVertices);
 
     // 3. Rasterization
     std::vector<Fragment> fragments;
-    for (std::vector<glm::vec3> triangle : triangles) {
-        std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0], triangle[1], triangle[2]);
+    for (std::vector<Vertex> triangle : triangles) {
+        std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position);
 
         fragments.insert(
             fragments.end(),
@@ -107,6 +108,7 @@ int main() {
 
     // printVertexArray(transformedVertexArray);
 
+    // Test vertices
     std::vector<glm::vec3> vertices = {
         {0.0f, 1.0f, 0.0f},
         {-0.87f, -0.5f, 0.0f},
@@ -116,22 +118,6 @@ int main() {
         {-0.87f, -0.5f, 0.5f},
         {0.87f, -0.5f, 0.5f}
     };
-
-    Uniforms uniforms;
-
-    // glm::mat4 model = glm::mat4(1);
-    // glm::mat4 view = glm::mat4(1);
-    // glm::mat4 projection = glm::mat4(1);
-
-    glm::mat4 model = createModelMatrix(1.5f);
-    glm::mat4 view = createViewMatrix();
-    glm::mat4 projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
-    glm::mat4 viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    uniforms.model = model;
-    uniforms.view = view;
-    uniforms.projection = projection;
-    uniforms.viewport = viewport;
 
     // Render loop
     bool quit = false;
@@ -143,11 +129,17 @@ int main() {
             }
         }
 
+        // Calculate matrixes dor rendering
+        uniforms.model = createModelMatrix(1.0f);
+        uniforms.view = createViewMatrix();
+        uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
+        uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
+
         // Clear the buffer
         clear();
 
         // Call render() function
-        render(vertices, uniforms);
+        render(vertices);
         
         SDL_RenderPresent(renderer);
 

@@ -97,12 +97,12 @@ std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, con
     return vertexArray;
 }
 
-std::vector<std::vector<glm::vec3>> primitiveAssembly (const std::vector<glm::vec3>& transformedVertices) {
+std::vector<std::vector<Vertex>> primitiveAssembly (const std::vector<Vertex>& transformedVertices) {
     // Group your vertices in groups of 3
-    std::vector<std::vector<glm::vec3>> assembledVertices;
+    std::vector<std::vector<Vertex>> assembledVertices;
 
     for (int i = 0; i < transformedVertices.size() - 1; i += 3) {
-        std::vector<glm::vec3> vertexGroup;
+        std::vector<Vertex> vertexGroup;
         vertexGroup.push_back(transformedVertices[i]);
         vertexGroup.push_back(transformedVertices[i + 1]);
         vertexGroup.push_back(transformedVertices[i + 2]);
