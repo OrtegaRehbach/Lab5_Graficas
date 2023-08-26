@@ -18,7 +18,7 @@ std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, con
 std::vector<std::vector<Vertex>> primitiveAssembly (const std::vector<Vertex>& transformedVertices);
 std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assembledVertices);
 
-glm::mat4 createModelMatrix(float scale);
+glm::mat4 createModelMatrix(const glm::vec3& scaleVector = glm::vec3(1, 1, 1), const glm::vec3& translationVector = glm::vec3(0, 0, 0), const float rotationAngleRadians = 0.0f, const glm::vec3& rotationAxis = glm::vec3(0, 1, 0));
 glm::mat4 createViewMatrix();
 glm::mat4 createProjectionMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT);
 glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT);

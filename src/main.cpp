@@ -114,10 +114,12 @@ int main() {
         {-0.87f, -0.5f, 0.0f},
         {0.87f, -0.5f, 0.0f},
         
-        {0.0f, 1.0f, 0.5f},
-        {-0.87f, -0.5f, 0.5f},
-        {0.87f, -0.5f, 0.5f}
+        {0.0f, 1.0f, -0.9f},
+        {-0.87f, -0.5f, -0.9f},
+        {0.87f, -0.5f, -0.9f}
     };
+
+    float rotation = 0.0f;
 
     // Render loop
     bool quit = false;
@@ -129,21 +131,23 @@ int main() {
             }
         }
 
+        // Clear the buffer
+        clear();
+
         // Calculate matrixes dor rendering
-        uniforms.model = createModelMatrix(1.0f);
+        uniforms.model = createModelMatrix(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), rotation += 0.1f);
         uniforms.view = createViewMatrix();
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        // Clear the buffer
-        clear();
-
         // Call render() function
         render(vertices);
         
+        // Present the framebuffer to the screen
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(10);
+        // Delay to limit the frame rate
+        SDL_Delay(1000/60);
     }
 
     SDL_DestroyRenderer(renderer);

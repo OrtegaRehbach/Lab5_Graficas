@@ -125,8 +125,13 @@ std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assem
     return fragments;
 }
 
-glm::mat4 createModelMatrix(float scale) {
-    glm::mat4 modelMatrix = glm::mat4(1);
+glm::mat4 createModelMatrix(const glm::vec3& scaleVector, const glm::vec3& translationVector, const float rotationAngleRadians, const glm::vec3& rotationAxis) {
+    glm::mat4 translation = glm::translate(glm::mat4(1), translationVector);
+    glm::mat4 scale = glm::scale(glm::mat4(1), scaleVector);
+    glm::mat4 rotation = glm::rotate(glm::mat4(1), rotationAngleRadians, rotationAxis);
+
+    glm::mat4 modelMatrix = glm::mat4(1) * translation * scale * rotation;
+    
     return modelMatrix;
 }
 
