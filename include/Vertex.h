@@ -8,6 +8,9 @@ struct Vertex {
     glm::vec3 position; // Using glm::vec3 for x, y, z coordinates
     Color color;        // Color member
 
+    // Empty constructor
+    Vertex() : position(glm::vec3(0, 0, 0)), color(Color(255, 255, 255)) {}
+
     // Constructor with a default color
     Vertex(const glm::vec3& pos, const Color& col = Color(255, 255, 255))
         : position(pos), color(col) {}
