@@ -8,4 +8,4 @@
 
 Vertex vertexShader(const Vertex& vertex, const Uniforms& uniforms);
 Vertex vertexShader(const Vertex& vertex);
-Color fragmentShader(const Fragment& fragment);
+Fragment fragmentShader(const Fragment& fragment);
