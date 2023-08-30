@@ -140,7 +140,7 @@ int main() {
         clear();
 
         // Calculate matrixes dor rendering
-        uniforms.model = createModelMatrix(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), rotation += 0.1f);
+        uniforms.model = createModelMatrix(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), rotation += 0.01f);
         uniforms.view = createViewMatrix();
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
