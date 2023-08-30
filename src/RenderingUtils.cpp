@@ -25,7 +25,7 @@ std::vector<Fragment> drawLine(const glm::vec3& start, const glm::vec3& end, con
     std::vector<Fragment> lineFragments;
 
     while (true) {
-        lineFragments.push_back(Fragment(x0, y0));
+        lineFragments.push_back(Fragment(x0, y0, color));
 
         if (x0 == x1 && y0 == y1) break;
         int e2 = 2 * err;
@@ -45,9 +45,9 @@ std::vector<Fragment> drawLine(const glm::vec3& start, const glm::vec3& end, con
 std::vector<Fragment> drawTriangle(const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& pointC, const Color& color) {
     std::vector<Fragment> triangleFragments;
     
-    std::vector<Fragment> lineAB = drawLine(pointA, pointB);
-    std::vector<Fragment> lineBC = drawLine(pointB, pointC);
-    std::vector<Fragment> lineCA = drawLine(pointC, pointA);
+    std::vector<Fragment> lineAB = drawLine(pointA, pointB, color);
+    std::vector<Fragment> lineBC = drawLine(pointB, pointC, color);
+    std::vector<Fragment> lineCA = drawLine(pointC, pointA, color);
 
     triangleFragments.insert(
         triangleFragments.end(),
@@ -70,8 +70,8 @@ std::vector<Fragment> drawTriangle(const glm::vec3& pointA, const glm::vec3& poi
     return triangleFragments;
 }
 
-std::vector<Fragment> drawTriangle(const std::vector<glm::vec3>& triangle, const Color& color) {
-    return drawTriangle(triangle[0], triangle[1], triangle[2], color);
+std::vector<Fragment> drawTriangle(const std::vector<Vertex>& triangle, const Color& color) {
+    return drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, color);
 }
 
 std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, const std::vector<Face>& faces) {
