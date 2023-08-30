@@ -34,14 +34,19 @@ void clear() {
     SDL_RenderClear(renderer);
 }
 
-void render(std::vector<glm::vec3> vertices) {
+void render(std::vector<glm::vec3> vertexBufferObject) {
     // 1. Vertex Shader
     std::vector<Vertex> transformedVertices;
-    for (glm::vec3 vertex : vertices) {
+    for (int i = 0; i < vertexBufferObject.size(); i += 2) {
+        glm::vec3 vertexPosition = vertexBufferObject[i];
+        glm::vec3 vertexColor = vertexBufferObject[i + 1];
+
+        Vertex vertex(vertexPosition, Color(vertexColor.x, vertexColor.y, vertexColor.z));
+
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
     }
-
+    
     // 2. Primitive Assembly
     std::vector<std::vector<Vertex>> triangles = primitiveAssembly(transformedVertices);
 
@@ -93,7 +98,7 @@ int main() {
     std::vector<Vertex> vertices_;
     std::vector<Face> faces;
 
-    bool loadModel = true;
+    bool loadModel = false;
     if (loadModel) {
         if (!ObjLoader::LoadObj("../models/model.obj", vertices_, faces)) {
             SDL_Log("Failed to load .obj file.");
@@ -109,14 +114,14 @@ int main() {
     // printVertexArray(transformedVertexArray);
 
     // Test vertices
-    std::vector<glm::vec3> vertices = {
-        {0.0f, 1.0f, 0.0f},
-        {-0.87f, -0.5f, 0.0f},
-        {0.87f, -0.5f, 0.0f},
+    std::vector<glm::vec3> VBO = {
+        {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f},
+        {-0.87f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f},
+        {0.87f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f},
         
-        {0.0f, 1.0f, -0.9f},
-        {-0.87f, -0.5f, -0.9f},
-        {0.87f, -0.5f, -0.9f}
+        {0.0f, 1.0f, -0.9f}, {0.0f, 1.0f, 0.0f},
+        {-0.87f, -0.5f, -0.9f}, {0.0f, 1.0f, 0.0f},
+        {0.87f, -0.5f, -0.9f}, {0.0f, 1.0f, 0.0f}
     };
 
     float rotation = 0.0f;
@@ -141,7 +146,7 @@ int main() {
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
 
         // Call render() function
-        render(vertices);
+        render(VBO);
         
         // Present the framebuffer to the screen
         SDL_RenderPresent(renderer);
