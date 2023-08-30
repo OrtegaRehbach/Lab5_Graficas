@@ -53,7 +53,7 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     // 3. Rasterization
     std::vector<Fragment> fragments;
     for (std::vector<Vertex> triangle : triangles) {
-        std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position);
+        std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, triangle[0].color);
 
         fragments.insert(
             fragments.end(),
@@ -64,8 +64,8 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
 
     // 4. Fragment Shader
     for (Fragment fragment : fragments) {
-        Color fragmentColor = fragmentShader(fragment);
-        drawPoint(renderer, fragment.x, fragment.y, fragmentColor);
+        Fragment transformedFragment = fragmentShader(fragment);
+        drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
     }
 }
 
