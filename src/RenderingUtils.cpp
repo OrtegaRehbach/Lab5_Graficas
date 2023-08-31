@@ -74,6 +74,32 @@ std::vector<Fragment> drawTriangle(const std::vector<Vertex>& triangle, const Co
     return drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, color);
 }
 
+std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const Color& color) {
+    glm::vec3 A = a.position;
+    glm::vec3 B = b.position;
+    glm::vec3 C = c.position;
+
+    std::vector<Fragment> triangleFragments;
+
+    // Build bounding box
+    float minX = std::min(std::min(A.x, B.x), C.x);
+    float minY = std::min(std::min(A.y, B.y), C.y);
+    float maxX = std::max(std::max(A.x, B.x), C.x);
+    float maxY = std::max(std::max(A.y, B.y), C.y);
+
+    for (float y = minY; y <= maxY; y++) {
+        for (float x = minX; x <= maxX; x++) {
+            glm::vec3 P(x, y, 0.0f);
+            glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
+            if (isInsideTriangle(barCoords)) {
+                triangleFragments.push_back(Fragment(x, y, color));   // Pass the color of A for now
+            }
+        }
+    }
+    
+    return triangleFragments;
+}
+
 std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, const std::vector<Face>& faces) {
     std::vector<glm::vec3> vertexArray;
 
@@ -160,4 +186,24 @@ glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT) {
     viewport = glm::translate(viewport, glm::vec3(1.0f, 1.0f, 0.5f));
 
     return viewport;
+}
+
+glm::vec3 barycentricCoordinates(const glm::vec3& P, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C) {
+    float w =   ((B.y - C.y)*(P.x - C.x) + (C.x - B.x)*(P.y - C.y)) / 
+                ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
+
+    float u =   ((C.y - A.y)*(P.x - C.x) + (A.x - C.x)*(P.y - C.y)) / 
+                ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
+
+    float v = 1.0f - u - w;
+
+    return glm::vec3(w, u, v);
+}
+
+bool isInsideTriangle(const glm::vec3& barycentricCoordinates) {
+    return (
+        barycentricCoordinates.x <= 1 && barycentricCoordinates.x >= 0 &&
+        barycentricCoordinates.y <= 1 && barycentricCoordinates.y >= 0 &&
+        barycentricCoordinates.z <= 1 && barycentricCoordinates.z >= 0
+    );
 }
