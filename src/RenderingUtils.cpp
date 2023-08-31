@@ -74,7 +74,7 @@ std::vector<Fragment> drawTriangle(const std::vector<Vertex>& triangle, const Co
     return drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, color);
 }
 
-std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const Color& color) {
+std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
     glm::vec3 A = a.position;
     glm::vec3 B = b.position;
     glm::vec3 C = c.position;
@@ -92,6 +92,7 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const C
             glm::vec3 P(x, y, 0.0f);
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
             if (isInsideTriangle(barCoords)) {
+                Color color = a.color * barCoords.x + b.color * barCoords.y + c.color * barCoords.z;
                 triangleFragments.push_back(Fragment(x, y, color));   // Pass the color of A for now
             }
         }
