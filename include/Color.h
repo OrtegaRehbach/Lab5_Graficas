@@ -30,6 +30,19 @@ struct Color {
         alpha = (alpha > 255) ? 255 : ((alpha < 0) ? 0 : alpha);
     }
 
+    Color operator+(const Color& other) const {
+        int r = static_cast<int>(red) + static_cast<int>(other.red);
+        int g = static_cast<int>(green) + static_cast<int>(other.green);
+        int b = static_cast<int>(blue) + static_cast<int>(other.blue);
+        int a = static_cast<int>(alpha) + static_cast<int>(other.alpha);
+
+        r = (r > 255) ? 255 : ((r < 0) ? 0 : r);
+        g = (g > 255) ? 255 : ((g < 0) ? 0 : g);
+        b = (b > 255) ? 255 : ((b < 0) ? 0 : b);
+        a = (a > 255) ? 255 : ((a < 0) ? 0 : a);
+
+        return Color(r, g, b, a);
+    }
 
     Color operator*(float scalar) const {
         Uint8 r = static_cast<Uint8>(red * scalar);
