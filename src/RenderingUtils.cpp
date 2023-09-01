@@ -25,7 +25,7 @@ std::vector<Fragment> drawLine(const glm::vec3& start, const glm::vec3& end, con
     std::vector<Fragment> lineFragments;
 
     while (true) {
-        lineFragments.push_back(Fragment(x0, y0, color));
+        lineFragments.push_back(Fragment(x0, y0, 0.0f, color));
 
         if (x0 == x1 && y0 == y1) break;
         int e2 = 2 * err;
@@ -93,7 +93,8 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
             if (isInsideTriangle(barCoords)) {
                 Color color = a.color * barCoords.x + b.color * barCoords.y + c.color * barCoords.z;
-                triangleFragments.push_back(Fragment(x, y, color));   // Pass the color of A for now
+                P.z = a.position.z * barCoords.x + b.position.z * barCoords.y + c.position.z * barCoords.z;
+                triangleFragments.push_back(Fragment(P, color));
             }
         }
     }
