@@ -171,7 +171,7 @@ glm::mat4 createViewMatrix() {
 
 glm::mat4 createProjectionMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT) {
   float fovInDegrees = 45.0f;
-  float aspectRatio = SCREEN_WIDTH / SCREEN_HEIGHT;
+  float aspectRatio = static_cast<float>(SCREEN_WIDTH) / static_cast<float>(SCREEN_HEIGHT);
   float nearClip = 0.1f;
   float farClip = 100.0f;
 
