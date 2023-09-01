@@ -84,10 +84,10 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
     std::vector<Fragment> triangleFragments;
 
     // Build bounding box
-    int minX = static_cast<int>( std::min(std::min(A.x, B.x), C.x) );
-    int minY = static_cast<int>( std::min(std::min(A.y, B.y), C.y) );
-    int maxX = static_cast<int>( std::max(std::max(A.x, B.x), C.x) );
-    int maxY = static_cast<int>( std::max(std::max(A.y, B.y), C.y) );
+    int minX = static_cast<int>( std::ceil( std::min(std::min(A.x, B.x), C.x) ) );
+    int minY = static_cast<int>( std::ceil( std::min(std::min(A.y, B.y), C.y) ) );
+    int maxX = static_cast<int>( std::floor( std::max(std::max(A.x, B.x), C.x) ) );
+    int maxY = static_cast<int>( std::floor( std::max(std::max(A.y, B.y), C.y) ) );
 
     for (int y = minY; y <= maxY; y++) {
         for (int x = minX; x <= maxX; x++) {
