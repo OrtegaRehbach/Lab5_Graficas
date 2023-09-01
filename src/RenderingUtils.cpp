@@ -99,7 +99,7 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
                 P.z = interpolatedZ;
 
                 // Calculate normal
-                glm::vec3 normal = calculateTrinagleNormal(A, B, C);
+                glm::vec3 normal = calculateTriangleNormal(A, B, C);
                 
                 // Calculate light direction
                 glm::vec3 lightDirection = glm::normalize(L - P);
@@ -216,10 +216,11 @@ glm::vec3 barycentricCoordinates(const glm::vec3& P, const glm::vec3& A, const g
 }
 
 bool isInsideTriangle(const glm::vec3& barycentricCoordinates) {
+    float epsilon = 1e-10;
     return (
-        barycentricCoordinates.x <= 1 && barycentricCoordinates.x >= 0 &&
-        barycentricCoordinates.y <= 1 && barycentricCoordinates.y >= 0 &&
-        barycentricCoordinates.z <= 1 && barycentricCoordinates.z >= 0
+        barycentricCoordinates.x <= 1 && barycentricCoordinates.x > epsilon &&
+        barycentricCoordinates.y <= 1 && barycentricCoordinates.y > epsilon &&
+        barycentricCoordinates.z <= 1 && barycentricCoordinates.z > epsilon
     );
 }
 
@@ -233,7 +234,7 @@ glm::vec3 findTriangleCentroid(Vertex a, Vertex b, Vertex c) {
     return centroid;
 }
 
-glm::vec3 calculateTrinagleNormal(glm::vec3 A,glm::vec3 B, glm::vec3 C) {
+glm::vec3 calculateTriangleNormal(glm::vec3 A,glm::vec3 B, glm::vec3 C) {
     glm::vec3 edge1 = B - A;
     glm::vec3 edge2 = C - A;
     glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
