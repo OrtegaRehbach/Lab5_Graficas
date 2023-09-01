@@ -1,5 +1,7 @@
 #include "RenderingUtils.h"
 
+glm::vec3 L(400, 400, 200);
+
 void drawPoint(SDL_Renderer* renderer, float x_position, float y_position, const Color& color) {
     // Get Screen dimensions for coordinate adjustment
     int SCREEN_WIDTH;
@@ -92,9 +94,22 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
             glm::vec3 P(x, y, 0.0f);
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
             if (isInsideTriangle(barCoords)) {
-                Color color = a.color * barCoords.x + b.color * barCoords.y + c.color * barCoords.z;
-                P.z = a.position.z * barCoords.x + b.position.z * barCoords.y + c.position.z * barCoords.z;
-                triangleFragments.push_back(Fragment(P, color));
+                // Interpolate z value
+                float interpolatedZ = a.position.z * barCoords.x + b.position.z * barCoords.y + c.position.z * barCoords.z;
+                P.z = interpolatedZ;
+
+                // Calculate normal
+                glm::vec3 edge1 = B - A;
+                glm::vec3 edge2 = C - A;
+                glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+                
+                // Calculate light direction
+                glm::vec3 lightDirection = glm::normalize(L - P);
+
+                // Calculate intensity
+                float intensity = glm::dot(normal, lightDirection);
+                
+                triangleFragments.push_back(Fragment(P, Color(), intensity));
             }
         }
     }
