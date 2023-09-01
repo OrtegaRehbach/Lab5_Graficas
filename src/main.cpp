@@ -53,11 +53,8 @@ void point(Fragment fragment) {
 void render(std::vector<glm::vec3> vertexBufferObject) {
     // 1. Vertex Shader
     std::vector<Vertex> transformedVertices;
-    for (int i = 0; i < vertexBufferObject.size(); i += 2) {
-        glm::vec3 vertexPosition = vertexBufferObject[i];
-        glm::vec3 vertexColor = vertexBufferObject[i + 1];
-
-        Vertex vertex(vertexPosition, Color(vertexColor.x, vertexColor.y, vertexColor.z));
+    for (int i = 0; i < vertexBufferObject.size(); i ++) {
+        Vertex vertex(vertexBufferObject[i]);
 
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
@@ -113,12 +110,12 @@ int main() {
     if (!init()) { return 1; }
     
     // Read from .obj file and store the vertices/faces
-    std::vector<Vertex> vertices_;
+    std::vector<Vertex> vertices;
     std::vector<Face> faces;
 
-    bool loadModel = false;
+    bool loadModel = true;
     if (loadModel) {
-        if (!ObjLoader::LoadObj("../models/model.obj", vertices_, faces)) {
+        if (!ObjLoader::LoadObj("../models/Lab3_Ship.obj", vertices, faces)) {
             SDL_Log("Failed to load .obj file.");
             return 1;
         } else {
@@ -126,25 +123,7 @@ int main() {
         }
     }
 
-    std::vector<glm::vec3> vertexArray = setupVertexArray(vertices_, faces);
-    std::vector<glm::vec3> transformedVertexArray = transformVertexArray(vertexArray, 50.0f);
-
-    // printVertexArray(transformedVertexArray);
-
-    // Test vertices
-    std::vector<glm::vec3> VBO = {
-        {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f},
-        {-0.87f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f},
-        {0.87f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f},
-        
-        {0.0f, 1.0f, 0.9f}, {1.0f, 1.0f, 0.0f},
-        {-0.87f, -0.5f, 0.9f}, {0.0f, 1.0f, 1.0f},
-        {0.87f, -0.5f, 0.9f}, {1.0f, 0.0f, 1.0f},
-
-        {0.0f, 1.0f, 2.0f}, {1.0f, 0.5f, 1.0f},
-        {-0.87f, -0.5f, 2.0f}, {1.0f, 1.0f, 0.5f},
-        {0.87f, -0.5f, 2.0f}, {0.5f, 1.0f, 1.0f}
-    };
+    std::vector<glm::vec3> VBO = setupVertexArray(vertices, faces);
 
     float rotation = 0.0f;
 
@@ -162,7 +141,7 @@ int main() {
         clear();
 
         // Calculate matrixes dor rendering
-        uniforms.model = createModelMatrix(glm::vec3(1, 1, 1), glm::vec3(0, 0, 0), rotation += 0.01f);
+        uniforms.model = createModelMatrix(glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, 0, 0), rotation += 0.01f);
         uniforms.view = createViewMatrix();
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
