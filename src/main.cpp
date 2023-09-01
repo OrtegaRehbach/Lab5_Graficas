@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 #include <vector>
+#include <array>
 #include "ObjLoader.h"
 #include "Vertex.h"
 #include "Face.h"
@@ -11,6 +12,8 @@
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
+
+std::array<std::array<float, SCREEN_WIDTH>, SCREEN_HEIGHT> zbuffer;
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
@@ -32,6 +35,19 @@ bool init() {
 void clear() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
+    // Fill the z-buffer
+    for (auto &row : zbuffer) {
+        std::fill(row.begin(), row.end(), 99999.0f);
+    }
+}
+
+void point(Fragment fragment) {
+    if (fragment.z < zbuffer[fragment.y][fragment.x]) {
+        // Draw the fragment on screen
+        drawPoint(renderer, fragment.x, fragment.y, fragment.color);
+        // Update the zbuffer for value for this position
+        zbuffer[fragment.y][fragment.x] = fragment.z;
+    }
 }
 
 void render(std::vector<glm::vec3> vertexBufferObject) {
@@ -66,7 +82,8 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     // 4. Fragment Shader
     for (Fragment fragment : fragments) {
         Fragment transformedFragment = fragmentShader(fragment);
-        drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
+        // drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
+        point(transformedFragment);
     }
 }
 
@@ -120,13 +137,13 @@ int main() {
         {-0.87f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f},
         {0.87f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f},
         
-        {0.0f, 1.0f, -0.9f}, {1.0f, 1.0f, 0.0f},
-        {-0.87f, -0.5f, -0.9f}, {0.0f, 1.0f, 1.0f},
-        {0.87f, -0.5f, -0.9f}, {1.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.9f}, {1.0f, 1.0f, 0.0f},
+        {-0.87f, -0.5f, 0.9f}, {0.0f, 1.0f, 1.0f},
+        {0.87f, -0.5f, 0.9f}, {1.0f, 0.0f, 1.0f},
 
-        {0.0f, 1.0f, -2.0f}, {1.0f, 0.5f, 1.0f},
-        {-0.87f, -0.5f, -2.0f}, {1.0f, 1.0f, 0.5f},
-        {0.87f, -0.5f, -2.0f}, {0.5f, 1.0f, 1.0f}
+        {0.0f, 1.0f, 2.0f}, {1.0f, 0.5f, 1.0f},
+        {-0.87f, -0.5f, 2.0f}, {1.0f, 1.0f, 0.5f},
+        {0.87f, -0.5f, 2.0f}, {0.5f, 1.0f, 1.0f}
     };
 
     float rotation = 0.0f;
