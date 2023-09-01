@@ -84,14 +84,14 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
     std::vector<Fragment> triangleFragments;
 
     // Build bounding box
-    float minX = std::min(std::min(A.x, B.x), C.x);
-    float minY = std::min(std::min(A.y, B.y), C.y);
-    float maxX = std::max(std::max(A.x, B.x), C.x);
-    float maxY = std::max(std::max(A.y, B.y), C.y);
+    int minX = static_cast<int>( std::min(std::min(A.x, B.x), C.x) );
+    int minY = static_cast<int>( std::min(std::min(A.y, B.y), C.y) );
+    int maxX = static_cast<int>( std::max(std::max(A.x, B.x), C.x) );
+    int maxY = static_cast<int>( std::max(std::max(A.y, B.y), C.y) );
 
-    for (float y = minY; y <= maxY; y++) {
-        for (float x = minX; x <= maxX; x++) {
-            glm::vec3 P(x, y, 0.0f);
+    for (int y = minY; y <= maxY; y++) {
+        for (int x = minX; x <= maxX; x++) {
+            glm::vec3 P(x, y, 0);
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
             if (isInsideTriangle(barCoords)) {
                 // Interpolate z value
@@ -99,9 +99,7 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
                 P.z = interpolatedZ;
 
                 // Calculate normal
-                glm::vec3 edge1 = B - A;
-                glm::vec3 edge2 = C - A;
-                glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+                glm::vec3 normal = calculateTrinagleNormal(A, B, C);
                 
                 // Calculate light direction
                 glm::vec3 lightDirection = glm::normalize(L - P);
@@ -224,3 +222,23 @@ bool isInsideTriangle(const glm::vec3& barycentricCoordinates) {
         barycentricCoordinates.z <= 1 && barycentricCoordinates.z >= 0
     );
 }
+
+glm::vec3 findTriangleCentroid(Vertex a, Vertex b, Vertex c) {
+    glm::vec3 A = a.position;
+    glm::vec3 B = b.position;
+    glm::vec3 C = c.position;
+
+    glm::vec3 centroid = glm::vec3( (A.x + B.x + C.x) / 3,  (A.y + B.y + C.y) / 3, (A.z + B.z + C.z) / 3);
+
+    return centroid;
+}
+
+glm::vec3 calculateTrinagleNormal(glm::vec3 A,glm::vec3 B, glm::vec3 C) {
+    glm::vec3 edge1 = B - A;
+    glm::vec3 edge2 = C - A;
+    glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+    // glm::vec3 normal = glm::cross(edge1, edge2);
+
+    return normal;
+}
+

@@ -29,3 +29,5 @@ glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT);
 // Related calculations
 glm::vec3 barycentricCoordinates(const glm::vec3& P, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C);
 bool isInsideTriangle(const glm::vec3& barycentricCoordinates);
+glm::vec3 findTriangleCentroid(Vertex a, Vertex b, Vertex c);
+glm::vec3 calculateTrinagleNormal(glm::vec3 A,glm::vec3 B, glm::vec3 C);
