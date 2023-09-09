@@ -23,7 +23,7 @@ std::vector<std::vector<Vertex>> primitiveAssembly (const std::vector<Vertex>& t
 std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assembledVertices);
 // Transformation matrixes
 glm::mat4 createModelMatrix(const glm::vec3& scaleVector = glm::vec3(1, 1, 1), const glm::vec3& translationVector = glm::vec3(0, 0, 0), const float rotationAngleRadians = 0.0f, const glm::vec3& rotationAxis = glm::vec3(0, 1, 0));
-glm::mat4 createViewMatrix();
+glm::mat4 createViewMatrix(Camera camera);
 glm::mat4 createProjectionMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT);
 glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT);
 // Related calculations

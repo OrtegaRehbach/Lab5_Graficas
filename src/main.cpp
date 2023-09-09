@@ -123,7 +123,10 @@ int main() {
         }
     }
 
-    std::vector<glm::vec3> VBO = setupVertexArray(vertices, faces);
+    Camera camera = {glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)};
+    float cameraMovementSpeed = 0.1f;
+
+    std::vector<glm::vec3> VBO = setupVertexBufferObject(vertices, normals, faces);
 
     float rotation = 0.0f;
 
@@ -135,7 +138,23 @@ int main() {
             if (event.type == SDL_QUIT) {
                 quit = true;
             }
+            // Camera movement
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_s) {
+                    // "S" key was pressed
+                    glm::vec3 currentPos = camera.cameraPosition;
+                    glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z - cameraMovementSpeed);
+                    camera.cameraPosition = newPos;
+                }
+                if (event.key.keysym.sym == SDLK_w) {
+                    // "W" key was pressed
+                    glm::vec3 currentPos = camera.cameraPosition;
+                    glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z + cameraMovementSpeed);
+                    camera.cameraPosition = newPos;
+                }
+            }
         }
+        
 
         // Clear the buffer
         clear();

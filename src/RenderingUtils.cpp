@@ -176,9 +176,9 @@ glm::mat4 createModelMatrix(const glm::vec3& scaleVector, const glm::vec3& trans
     return modelMatrix;
 }
 
-glm::mat4 createViewMatrix() {
-    // glm::mat4 viewMatrix = glm::lookAt(camera.targetPosition, camera.cameraPosition, camera.upVector);
-    glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+glm::mat4 createViewMatrix(Camera camera) {
+    glm::mat4 viewMatrix = glm::lookAt(camera.cameraPosition, camera.targetPosition, camera.upVector);
+    // glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     return viewMatrix;
 }
 
