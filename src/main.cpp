@@ -63,10 +63,8 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     std::vector<Vertex> transformedVertices;
     for (int i = 0; i < vertexBufferObject.size(); i += 2) {
         Vertex vertex = Vertex(vertexBufferObject[i], vertexBufferObject[i + 1]);
-        // std::cout << vertex << std::endl;
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
-        // std::cout << transformedVertex << std::endl;
     }
     // exit(1);
     // 2. Primitive Assembly
@@ -75,7 +73,6 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     // 3. Rasterization
     std::vector<Fragment> fragments;
     for (std::vector<Vertex> triangle : triangles) {
-        // std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, triangle[0].color);
         std::vector<Fragment> rasterizedTriangle = getTriangleFragments(triangle[0], triangle[1], triangle[2], SCREEN_WIDTH, SCREEN_HEIGHT);
 
         fragments.insert(
@@ -87,10 +84,7 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     
     // 4. Fragment Shader
     for (Fragment fragment : fragments) {
-        // std::cout << "Before fragmentShader()" << std::endl;
         Fragment transformedFragment = fragmentShader(fragment);
-        // std::cout << "After fragmentShader()" << std::endl;
-        // drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
         point(transformedFragment);
     }
 }
@@ -153,8 +147,8 @@ int main() {
         clear();
 
         // Calculate matrixes for rendering
-        uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), rotation += 0.02f);
-        // uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), 0.0f);
+        uniforms.model = createModelMatrix(glm::vec3(0.2), glm::vec3(0, 0, 0), rotation += 0.02f);
+        // uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), 0.0f); // No rotation
         uniforms.view = createViewMatrix(camera);
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
