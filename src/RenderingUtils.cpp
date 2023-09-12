@@ -2,7 +2,6 @@
 
 // glm::vec3 L(0.0f, 0.0f, 1.0f);
 glm::vec3 L(0.5f, -1.0f, 1.0f);
-// glm::vec3 L(400, 400, 200);
 
 void drawPoint(SDL_Renderer* renderer, float x_position, float y_position, const Color& color) {
     // Get Screen dimensions for coordinate adjustment
@@ -94,7 +93,7 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const i
     for (int y = minY; y <= maxY; y++) {
         for (int x = minX; x <= maxX; x++) {
             if (x < 0 || y < 0 || y > SCREEN_HEIGHT || x > SCREEN_WIDTH)
-                continue;
+            continue;
 
             glm::vec3 P(x, y, 0);
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
@@ -107,19 +106,18 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const i
                 P.z = interpolatedZ;
 
                 // Calculate normal
-                // glm::vec3 normal = calculateTriangleNormal(A, B, C);
-                // glm::vec3 normal = a.normal;
                 glm::vec3 normal = glm::normalize(a.normal * u + b.normal * v + c.normal * w); 
-                // glm::vec3 normal = glm::vec3(0, 0, -1);
-                // glm::vec3 normal = glm::normalize(glm::cross(b.position - a.position, c.position - a.position));
                 
                 // Calculate light direction
                 glm::vec3 lightDirection = glm::normalize(L - P);
 
                 // Calculate intensity
                 float intensity = glm::dot(normal, glm::normalize(L));
-                intensity = (intensity < 0) ? abs(intensity) : 0.0f;
-                // intensity = (intensity < 0) ? abs(intensity) : intensity;
+                intensity = (intensity < 0) ? abs(intensity) : 0.0f;    // Truncate the value of normals facing opposite of L
+
+                // Backface culling
+                if (intensity <= 0)
+                continue;
             
 
                 triangleFragments.push_back(Fragment(P, Color(), intensity));
