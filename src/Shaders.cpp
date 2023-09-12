@@ -8,27 +8,30 @@ Vertex vertexShader(const Vertex& vertex, const Uniforms& uniforms) {
     // Perspective divide
     glm::vec3 ndcVertex = glm::vec3(clipSpaceVertex) / clipSpaceVertex.w;
 
-
     // Apply the viewport transform
     glm::vec4 screenVertex = uniforms.viewport * glm::vec4(ndcVertex, 1.0f);
-    
-    // Return the transformed vertex as a vec3
+
+    // Transform the normal
+    glm::vec3 transformedNormal = glm::mat3(uniforms.model) * vertex.normal;
+    transformedNormal = glm::normalize(transformedNormal);
+    glm::vec3 normal = transformedNormal;
+
+    // std::cout << "Transformed Normal(" << normal.x << ", " << normal.y << ", " << normal.z << ")" << std::endl;
+   
+    // Return the transformed vertex
     return Vertex{
         glm::vec3(screenVertex),
-        vertex.color
+        transformedNormal
+        // vertex.normal
     };
-}
-
-Vertex vertexShader(const Vertex& vertex) {
-    return vertex;
 }
 
 Fragment fragmentShader(const Fragment& fragment) {
     // Example: Assign a constant color to each fragment
     glm::vec3 fragmentPosition(fragment.x, fragment.y, fragment.z);
-    Color fragmentColor = Color(220, 220, 220) * fragment.intensity;
+    Color fragmentColor = Color(220, 220, 220);
 
-    Fragment shadedFragment = Fragment(fragmentPosition, fragmentColor);
+    Fragment shadedFragment = Fragment(fragmentPosition, fragmentColor * fragment.intensity);
 
     // You can modify this function to implement more complex shading
     // based on the fragment's attributes (e.g., depth, interpolated normals, texture coordinates, etc.)

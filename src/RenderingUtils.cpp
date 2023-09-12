@@ -1,6 +1,8 @@
 #include "RenderingUtils.h"
 
-glm::vec3 L(400, 400, 200);
+// glm::vec3 L(0.0f, 0.0f, 1.0f);
+glm::vec3 L(0.5f, -1.0f, 1.0f);
+// glm::vec3 L(400, 400, 200);
 
 void drawPoint(SDL_Renderer* renderer, float x_position, float y_position, const Color& color) {
     // Get Screen dimensions for coordinate adjustment
@@ -76,7 +78,7 @@ std::vector<Fragment> drawTriangle(const std::vector<Vertex>& triangle, const Co
     return drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, color);
 }
 
-std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
+std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const int SCREEN_WIDTH, const int SCREEN_HEIGHT) {
     glm::vec3 A = a.position;
     glm::vec3 B = b.position;
     glm::vec3 C = c.position;
@@ -91,22 +93,35 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
 
     for (int y = minY; y <= maxY; y++) {
         for (int x = minX; x <= maxX; x++) {
+            if (x < 0 || y < 0 || y > SCREEN_HEIGHT || x > SCREEN_WIDTH)
+                continue;
+
             glm::vec3 P(x, y, 0);
             glm::vec3 barCoords = barycentricCoordinates(P, A, B, C);
+            float u = barCoords.x;
+            float v = barCoords.y;
+            float w = barCoords.z;
             if (isInsideTriangle(barCoords)) {
                 // Interpolate z value
-                float interpolatedZ = a.position.z * barCoords.x + b.position.z * barCoords.y + c.position.z * barCoords.z;
+                float interpolatedZ = a.position.z * u + b.position.z * v + c.position.z * w;
                 P.z = interpolatedZ;
 
                 // Calculate normal
-                glm::vec3 normal = calculateTriangleNormal(A, B, C);
+                // glm::vec3 normal = calculateTriangleNormal(A, B, C);
+                // glm::vec3 normal = a.normal;
+                glm::vec3 normal = glm::normalize(a.normal * u + b.normal * v + c.normal * w); 
+                // glm::vec3 normal = glm::vec3(0, 0, -1);
+                // glm::vec3 normal = glm::normalize(glm::cross(b.position - a.position, c.position - a.position));
                 
                 // Calculate light direction
                 glm::vec3 lightDirection = glm::normalize(L - P);
 
                 // Calculate intensity
-                float intensity = glm::dot(normal, lightDirection);
-                
+                float intensity = glm::dot(normal, glm::normalize(L));
+                intensity = (intensity < 0) ? abs(intensity) : 0.0f;
+                // intensity = (intensity < 0) ? abs(intensity) : intensity;
+            
+
                 triangleFragments.push_back(Fragment(P, Color(), intensity));
             }
         }
@@ -115,27 +130,24 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c) {
     return triangleFragments;
 }
 
-std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, const std::vector<Face>& faces) {
-    std::vector<glm::vec3> vertexArray;
+std::vector<glm::vec3> setupVertexBufferObject(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::vector<Face>& faces) {
+    std::vector<glm::vec3> vertexBufferObject;
 
     // For each face
     for (const auto& face : faces) {
-        // std::cout << "Face: " << face.vertexIndices.at(0).at(0) << ", " << face.vertexIndices.at(0).at(1) << ", " << face.vertexIndices.at(0).at(2) << std::endl;
-        // For each vertex in the face
-        for (const auto& vertexIndexArray : face.vertexIndices) {
-            // For each vertex index array in the 'vertexIndices' vector
-            for (const auto& vertexIndex : vertexIndexArray) {
-                // Get the vertex position from the input vertices array using the index from the face
-                // std::cout << "Read vertex index: " << vertexIndex << std::endl;
-                glm::vec3 vertexPosition = vertices[vertexIndex].position;
+        // For each vertex index array in the 'vertexIndices' array
+        for (int i = 0; i < 3; i++) {
+            // Get the vertex position from the input vertices array using the index from the face
+            glm::vec3 vertexPosition = vertices[face.vertexIndices[i]];
+            glm::vec3 vertexNormal = normals[face.normalIndices[i]];
 
-                // Add the vertex position to the vertex array
-                vertexArray.push_back(vertexPosition);
-            }
+            // Add the vertex position and normal to the vertex array
+            vertexBufferObject.push_back(vertexPosition);
+            vertexBufferObject.push_back(vertexNormal);
         }
     }
 
-    return vertexArray;
+    return vertexBufferObject;
 }
 
 std::vector<std::vector<Vertex>> primitiveAssembly (const std::vector<Vertex>& transformedVertices) {
@@ -204,23 +216,45 @@ glm::mat4 createViewportMatrix(int SCREEN_WIDTH, int SCREEN_HEIGHT) {
 }
 
 glm::vec3 barycentricCoordinates(const glm::vec3& P, const glm::vec3& A, const glm::vec3& B, const glm::vec3& C) {
-    float w =   ((B.y - C.y)*(P.x - C.x) + (C.x - B.x)*(P.y - C.y)) / 
-                ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
+    // float w =   ((B.y - C.y)*(P.x - C.x) + (C.x - B.x)*(P.y - C.y)) / 
+    //             ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
 
-    float u =   ((C.y - A.y)*(P.x - C.x) + (A.x - C.x)*(P.y - C.y)) / 
-                ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
+    // float u =   ((C.y - A.y)*(P.x - C.x) + (A.x - C.x)*(P.y - C.y)) / 
+    //             ((B.y - C.y)*(A.x - C.x) + (C.x - B.x)*(A.y - C.y));
 
-    float v = 1.0f - u - w;
+    // float v = 1.0f - u - w;
 
-    return glm::vec3(w, u, v);
+    // return glm::vec3(w, u, v);
+
+    glm::vec3 barCoords;
+
+    glm::vec3 v0 = B - A;
+    glm::vec3 v1 = C - A;
+    glm::vec3 v2 = P - A;
+
+    float d00 = glm::dot(v0, v0);
+    float d01 = glm::dot(v0, v1);
+    float d11 = glm::dot(v1, v1);
+    float d20 = glm::dot(v2, v0);
+    float d21 = glm::dot(v2, v1);
+
+    float denom = d00 * d11 - d01 * d01;
+
+    float v = (d11 * d20 - d01 * d21) / denom;
+    float w = (d00 * d21 - d01 * d20) / denom;
+    float u = 1.0f - v - w;
+
+    barCoords = glm::vec3(u, v, w);
+
+    return barCoords;
 }
 
 bool isInsideTriangle(const glm::vec3& barycentricCoordinates) {
     float epsilon = 1e-10;
     return (
-        barycentricCoordinates.x <= 1 && barycentricCoordinates.x > epsilon &&
-        barycentricCoordinates.y <= 1 && barycentricCoordinates.y > epsilon &&
-        barycentricCoordinates.z <= 1 && barycentricCoordinates.z > epsilon
+        barycentricCoordinates.x <= 1 && barycentricCoordinates.x >= epsilon &&
+        barycentricCoordinates.y <= 1 && barycentricCoordinates.y >= epsilon &&
+        barycentricCoordinates.z <= 1 && barycentricCoordinates.z >= epsilon
     );
 }
 

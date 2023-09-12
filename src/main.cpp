@@ -53,9 +53,9 @@ void point(Fragment fragment) {
 void render(std::vector<glm::vec3> vertexBufferObject) {
     // 1. Vertex Shader
     std::vector<Vertex> transformedVertices;
-    for (int i = 0; i < vertexBufferObject.size(); i ++) {
-        Vertex vertex(vertexBufferObject[i]);
-
+    for (int i = 0; i < vertexBufferObject.size(); i += 2) {
+        Vertex vertex = Vertex(vertexBufferObject[i], vertexBufferObject[i + 1]);
+        // std::cout << vertex << std::endl;
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
     }
@@ -110,17 +110,13 @@ int main() {
     if (!init()) { return 1; }
     
     // Read from .obj file and store the vertices/faces
-    std::vector<Vertex> vertices;
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
     std::vector<Face> faces;
 
     bool loadModel = true;
     if (loadModel) {
-        if (!ObjLoader::LoadObj("../models/Lab3_Ship.obj", vertices, faces)) {
-            SDL_Log("Failed to load .obj file.");
-            return 1;
-        } else {
-            SDL_Log("Loaded .obj file successfully.");
-        }
+        loadOBJ("../models/Lab3_Ship.obj", vertices, normals, faces);
     }
 
     Camera camera = {glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)};

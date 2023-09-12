@@ -16,9 +16,9 @@ void drawPoint(SDL_Renderer* renderer, float x_position, float y_position, const
 std::vector<Fragment> drawLine(const glm::vec3& start, const glm::vec3& end, const Color& color = Color(255, 255, 255));
 std::vector<Fragment> drawTriangle(const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& pointC, const Color& color = Color(255, 255, 255));
 std::vector<Fragment> drawTriangle(const std::vector<Vertex>& triangle, const Color& color = Color(255, 255, 255));
-std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c);
+std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const int SCREEN_WIDTH, const int SCREEN_HEIGHT);
 // Rendering pipeline
-std::vector<glm::vec3> setupVertexArray(const std::vector<Vertex>& vertices, const std::vector<Face>& faces);
+std::vector<glm::vec3> setupVertexBufferObject(const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals, const std::vector<Face>& faces);
 std::vector<std::vector<Vertex>> primitiveAssembly (const std::vector<Vertex>& transformedVertices);
 std::vector<Fragment> rasterize(const std::vector<std::vector<glm::vec3>>& assembledVertices);
 // Transformation matrixes
