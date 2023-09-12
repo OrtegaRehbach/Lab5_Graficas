@@ -42,8 +42,15 @@ void clear() {
     }
 }
 
+bool isInsideScreen(Fragment fragment) {
+    return (
+        fragment.x > 0 && fragment.x < SCREEN_WIDTH &&
+        fragment.y > 0 && fragment.y < SCREEN_HEIGHT
+    );
+}
+
 void point(Fragment fragment) {
-    if (fragment.z < zbuffer[fragment.y][fragment.x]) {
+    if (isInsideScreen(fragment) && fragment.z < zbuffer[fragment.y][fragment.x]) {
         // Draw the fragment on screen
         drawPoint(renderer, fragment.x, fragment.y, fragment.color);
         // Update the zbuffer for value for this position
@@ -68,7 +75,7 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
     std::vector<Fragment> fragments;
     for (std::vector<Vertex> triangle : triangles) {
         // std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, triangle[0].color);
-        std::vector<Fragment> rasterizedTriangle = getTriangleFragments(triangle[0], triangle[1], triangle[2]);
+        std::vector<Fragment> rasterizedTriangle = getTriangleFragments(triangle[0], triangle[1], triangle[2], SCREEN_WIDTH, SCREEN_HEIGHT);
 
         fragments.insert(
             fragments.end(),
