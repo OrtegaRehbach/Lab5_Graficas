@@ -66,8 +66,9 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
         // std::cout << vertex << std::endl;
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
+        // std::cout << transformedVertex << std::endl;
     }
-    
+    // exit(1);
     // 2. Primitive Assembly
     std::vector<std::vector<Vertex>> triangles = primitiveAssembly(transformedVertices);
 
@@ -83,33 +84,14 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
             rasterizedTriangle.end()
         );
     }
-
+    
     // 4. Fragment Shader
     for (Fragment fragment : fragments) {
+        // std::cout << "Before fragmentShader()" << std::endl;
         Fragment transformedFragment = fragmentShader(fragment);
+        // std::cout << "After fragmentShader()" << std::endl;
         // drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
         point(transformedFragment);
-    }
-}
-
-std::vector<glm::vec3> transformVertexArray(const std::vector<glm::vec3>& vertexArray, float scale, const int offset_x = SCREEN_WIDTH / 2, const int offset_y = SCREEN_HEIGHT / 2) {
-    std::vector<glm::vec3> transformedArray;
-
-    for (const glm::vec3& vertex : vertexArray) {
-        // Apply scaling and translation to each vertex
-        glm::vec3 transformedVertex = vertex * scale;
-        transformedVertex.x += offset_x;
-        transformedVertex.y += offset_y;
-        transformedArray.push_back(transformedVertex);
-    }
-
-    return transformedArray;
-}
-
-void printVertexArray(const std::vector<glm::vec3>& vertexArray) {
-    std::cout << "Vertex Array Contents:" << std::endl;
-    for (const glm::vec3& vertex : vertexArray) {
-        std::cout << "Vertex: (" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")" << std::endl;
     }
 }
 
@@ -170,9 +152,10 @@ int main() {
         // Clear the buffer
         clear();
 
-        // Calculate matrixes dor rendering
-        uniforms.model = createModelMatrix(glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, 0, 0), rotation += 0.02f);
-        uniforms.view = createViewMatrix();
+        // Calculate matrixes for rendering
+        uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), rotation += 0.02f);
+        // uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), 0.0f);
+        uniforms.view = createViewMatrix(camera);
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
 
