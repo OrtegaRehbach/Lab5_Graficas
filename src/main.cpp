@@ -137,17 +137,13 @@ int main() {
             }
             // Camera movement
             if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_s) {
+                if (event.key.keysym.sym == SDLK_w) {
                     // "S" key was pressed
-                    glm::vec3 currentPos = camera.cameraPosition;
-                    glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z - cameraMovementSpeed);
-                    camera.cameraPosition = newPos;
+                    camera.MoveForward(cameraMovementSpeed);
                 }
-                else if (event.key.keysym.sym == SDLK_w) {
+                else if (event.key.keysym.sym == SDLK_s) {
                     // "W" key was pressed
-                    glm::vec3 currentPos = camera.cameraPosition;
-                    glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z + cameraMovementSpeed);
-                    camera.cameraPosition = newPos;
+                    camera.MoveBackward(cameraMovementSpeed);
                 }
                 else if (event.key.keysym.sym == SDLK_a) {
                     // Rotate the camera left (orbit)
