@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <array>
+#include <sstream>
 #include "ObjLoader.h"
 #include "Vertex.h"
 #include "Face.h"
@@ -126,11 +127,13 @@ int main() {
     std::vector<glm::vec3> VBO = setupVertexBufferObject(vertices, normals, faces);
 
     float rotation = 0.0f;
+    Uint32 frameStart, frameTime;
 
     // Render loop
     bool quit = false;
     SDL_Event event;
     while (!quit) {
+        frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 quit = true;
@@ -172,8 +175,14 @@ int main() {
         // Present the framebuffer to the screen
         SDL_RenderPresent(renderer);
 
-        // Delay to limit the frame rate
-        SDL_Delay(1000/60);
+        frameTime = SDL_GetTicks() - frameStart;
+
+        // Calculate frames per second and update window title
+        if (frameTime > 0) {
+            std::ostringstream titleStream;
+            titleStream << "FPS: " << static_cast<int>(1000.0 / frameTime);  // Milliseconds to seconds
+            SDL_SetWindowTitle(window, titleStream.str().c_str());
+        }
     }
 
     SDL_DestroyRenderer(renderer);
