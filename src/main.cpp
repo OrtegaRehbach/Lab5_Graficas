@@ -124,7 +124,8 @@ int main() {
     }
 
     Camera camera = {glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)};
-    float cameraMovementSpeed = 0.1f;
+    const float cameraMovementSpeed = 0.1f;
+    const float horizontalRotationSpeed = 0.02f;
 
     std::vector<glm::vec3> VBO = setupVertexBufferObject(vertices, normals, faces);
 
@@ -146,11 +147,19 @@ int main() {
                     glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z - cameraMovementSpeed);
                     camera.cameraPosition = newPos;
                 }
-                if (event.key.keysym.sym == SDLK_w) {
+                else if (event.key.keysym.sym == SDLK_w) {
                     // "W" key was pressed
                     glm::vec3 currentPos = camera.cameraPosition;
                     glm::vec3 newPos = glm::vec3(currentPos.x, currentPos.y, currentPos.z + cameraMovementSpeed);
                     camera.cameraPosition = newPos;
+                }
+                else if (event.key.keysym.sym == SDLK_a) {
+                    // Rotate the camera left (orbit)
+                    camera.Rotate(horizontalRotationSpeed);
+                }
+                else if (event.key.keysym.sym == SDLK_d) {
+                    // Rotate the camera right (orbit)
+                    camera.Rotate(-horizontalRotationSpeed);
                 }
             }
         }
