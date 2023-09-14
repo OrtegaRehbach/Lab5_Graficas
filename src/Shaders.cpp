@@ -31,7 +31,9 @@ Fragment fragmentShader(const Fragment& fragment) {
     glm::vec3 fragmentPosition(fragment.x, fragment.y, fragment.z);
     Color fragmentColor = Color(220, 220, 220);
 
-    Fragment shadedFragment = Fragment(fragmentPosition, fragmentColor * fragment.intensity);
+    float intensity = fragment.intensity;
+    
+    Fragment shadedFragment = Fragment(fragmentPosition, fragmentColor * intensity);
 
     // You can modify this function to implement more complex shading
     // based on the fragment's attributes (e.g., depth, interpolated normals, texture coordinates, etc.)
