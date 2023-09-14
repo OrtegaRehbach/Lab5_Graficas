@@ -2,25 +2,25 @@
 
 #include <iostream>
 #include <glm/glm.hpp> // Include the GLM library
-#include "Color.h"      // Include the Color struct
 
 struct Vertex {
     glm::vec3 position; // Using glm::vec3 for x, y, z coordinates
-    Color color;        // Color member
+    glm::vec3 normal;   // Normal vector
+    glm::vec3 originalPos;
 
     // Empty constructor
-    Vertex() : position(glm::vec3(0, 0, 0)), color(Color(255, 255, 255)) {}
+    Vertex() : position(glm::vec3(0, 0, 0)), normal(glm::vec3(0, 1, 0)), originalPos(this->position) {}
 
-    // Constructor with a default color
-    Vertex(const glm::vec3& pos, const Color& col = Color(255, 255, 255))
-        : position(pos), color(col) {}
+    // Constructor
+    Vertex(const glm::vec3& pos, const glm::vec3& norm)
+        : position(pos), normal(norm), originalPos(this->position) {}
 
     // Overload the << operator for printing a Vertex
     friend std::ostream& operator<<(std::ostream& os, const Vertex& vertex) {
         os << "Vertex(" << vertex.position.x << ", " << vertex.position.y << ", " << vertex.position.z
-        << "), Color(" << static_cast<int>(vertex.color.red) << ", "
-        << static_cast<int>(vertex.color.green) << ", "
-        << static_cast<int>(vertex.color.blue) << ")";
+        << "), Normal(" << vertex.normal.x << ", " << vertex.normal.y << ", " << vertex.normal.z
+        // << "), OgPos(" << vertex.originalPos.x << ", " << vertex.originalPos.y << ", " << vertex.originalPos.z
+        << ")";
         return os;
     }
 };

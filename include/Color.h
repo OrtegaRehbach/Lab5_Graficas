@@ -11,6 +11,8 @@ struct Color {
     Uint8 blue;
     Uint8 alpha;
 
+    Color() : red(255), green(255), blue(255), alpha(255) {}
+
     Color(int r, int g, int b, int a = 255) {
         red =   static_cast<Uint8>((r > 255) ? 255 : ((r < 0) ? 0 : r));
         green = static_cast<Uint8>((g > 255) ? 255 : ((g < 0) ? 0 : g));

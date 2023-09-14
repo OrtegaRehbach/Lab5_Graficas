@@ -1,75 +1,63 @@
-#include "ObjLoader.h"
+#include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
+#include <array>
+#include <cstring>
+#include <algorithm>
+#include <glm/glm.hpp>
 
-bool ObjLoader::LoadObj(const std::string& filePath, std::vector<Vertex>& vertices, std::vector<Face>& faces) {
-    std::ifstream objFile(filePath);
-    if (!objFile.is_open()) {
+#include "ObjLoader.h"
+
+bool loadOBJ(const char* path, std::vector<glm::vec3>& out_vertices, std::vector<glm::vec3>& out_normals, std::vector<Face>& out_faces) {
+    std::ifstream file(path);
+    if (!file)
+    {
+        std::cout << "Failed to open the file: " << path << std::endl;
         return false;
     }
 
-    vertices.clear();
-    faces.clear();
-
     std::string line;
-    int lineNumber = 0;
-    while (std::getline(objFile, line)) {
-        ++lineNumber;
+    while (std::getline(file, line))
+    {
         std::istringstream iss(line);
-        char type;
-        iss >> type;
+        std::string lineHeader;
+        iss >> lineHeader;
 
-        if (type == 'v') {
-            glm::vec3 pos;
-            if (iss.str() != "") {
-                iss >> pos.x >> pos.y >> pos.z;
-                // std::cout << "Read vertex: " << "(" << pos.x << ", " << pos.y << ", " << pos.z  << ")" << std::endl;
-                vertices.push_back(Vertex(pos));
-            }
-            
-            
-        } else if (type == 'f') {
+        if (lineHeader == "v")
+        {
+            glm::vec3 vertex;
+            iss >> vertex.x >> vertex.y >> vertex.z;
+            out_vertices.push_back(vertex);
+        }
+        else if (lineHeader == "vn")
+        {
+            glm::vec3 normal;
+            iss >> normal.x >> normal.y >> normal.z;
+            out_normals.push_back(normal);
+        }
+        else if (lineHeader == "f")
+        {
             Face face;
-            std::vector<int> vertexIndices; // Store vertex indices of the face
+            for (int i = 0; i < 3; ++i)
+            {
+                std::string faceData;
+                iss >> faceData;
 
-            while (iss) {
-                int vertexIndex;
-                iss >> vertexIndex;
-                if (iss.fail()) {
-                    break;
-                }
-                // std::cout << "Read index: " << vertexIndex << std::endl;
-                vertexIndices.push_back(vertexIndex - 1); // Convert to 0-based indexing
-                
-                // Skip texture and normal indices
-                iss.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
-                // iss.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
+                std::replace(faceData.begin(), faceData.end(), '/', ' ');
+
+                std::istringstream faceDataIss(faceData);
+                int temp; // for discarding texture indices
+                faceDataIss >> face.vertexIndices[i] >> temp >> face.normalIndices[i];
+
+                // obj indices are 1-based, so convert to 0-based
+                face.vertexIndices[i]--;
+                face.normalIndices[i]--;
             }
-
-            // Build Face to store in 'faces' vector
-            face.vertexIndices.push_back({vertexIndices[0], vertexIndices[1], vertexIndices[2]});
-            faces.push_back(face);
-
-            // std::cout << "Loaded indexes:\n";
-            // for (const int vertexIndex : vertexIndices) {
-            //     std::cout << "(" << vertexIndex << ")" << std::endl;
-            // }
+            out_faces.push_back(face);
         }
     }
-
-    // Print the loaded vertices and faces (optional)
-    // std::cout << "Loaded vertices:\n";
-    // for (const Vertex& vertex : vertices) {
-    //     std::cout << vertex << "\n";
-    // }    
-
-    // std::cout << "\nLoaded faces:\n";
-    // for (const Face& face : faces) {
-    //     for (const auto& vertexIndices : face.vertexIndices) {
-    //         std::cout << "(" << vertexIndices[0] << ", " << vertexIndices[1] << ", " << vertexIndices[2] << ") ";
-    //     }
-    //     std::cout << "\n";
-    // }
 
     return true;
 }

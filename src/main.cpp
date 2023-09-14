@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <array>
+#include <sstream>
 #include "ObjLoader.h"
 #include "Vertex.h"
 #include "Face.h"
@@ -41,8 +42,15 @@ void clear() {
     }
 }
 
+bool isInsideScreen(Fragment fragment) {
+    return (
+        fragment.x > 0 && fragment.x < SCREEN_WIDTH &&
+        fragment.y > 0 && fragment.y < SCREEN_HEIGHT
+    );
+}
+
 void point(Fragment fragment) {
-    if (fragment.z < zbuffer[fragment.y][fragment.x]) {
+    if (isInsideScreen(fragment) && fragment.z < zbuffer[fragment.y][fragment.x]) {
         // Draw the fragment on screen
         drawPoint(renderer, fragment.x, fragment.y, fragment.color);
         // Update the zbuffer for value for this position
@@ -53,21 +61,19 @@ void point(Fragment fragment) {
 void render(std::vector<glm::vec3> vertexBufferObject) {
     // 1. Vertex Shader
     std::vector<Vertex> transformedVertices;
-    for (int i = 0; i < vertexBufferObject.size(); i ++) {
-        Vertex vertex(vertexBufferObject[i]);
-
+    for (int i = 0; i < vertexBufferObject.size(); i += 2) {
+        Vertex vertex = Vertex(vertexBufferObject[i], vertexBufferObject[i + 1]);
         Vertex transformedVertex = vertexShader(vertex, uniforms);
         transformedVertices.push_back(transformedVertex);
     }
-    
+    // exit(1);
     // 2. Primitive Assembly
     std::vector<std::vector<Vertex>> triangles = primitiveAssembly(transformedVertices);
 
     // 3. Rasterization
     std::vector<Fragment> fragments;
     for (std::vector<Vertex> triangle : triangles) {
-        // std::vector<Fragment> rasterizedTriangle = drawTriangle(triangle[0].position, triangle[1].position, triangle[2].position, triangle[0].color);
-        std::vector<Fragment> rasterizedTriangle = getTriangleFragments(triangle[0], triangle[1], triangle[2]);
+        std::vector<Fragment> rasterizedTriangle = getTriangleFragments(triangle[0], triangle[1], triangle[2], SCREEN_WIDTH, SCREEN_HEIGHT);
 
         fragments.insert(
             fragments.end(),
@@ -75,33 +81,11 @@ void render(std::vector<glm::vec3> vertexBufferObject) {
             rasterizedTriangle.end()
         );
     }
-
+    
     // 4. Fragment Shader
     for (Fragment fragment : fragments) {
         Fragment transformedFragment = fragmentShader(fragment);
-        // drawPoint(renderer, transformedFragment.x, transformedFragment.y, transformedFragment.color);
         point(transformedFragment);
-    }
-}
-
-std::vector<glm::vec3> transformVertexArray(const std::vector<glm::vec3>& vertexArray, float scale, const int offset_x = SCREEN_WIDTH / 2, const int offset_y = SCREEN_HEIGHT / 2) {
-    std::vector<glm::vec3> transformedArray;
-
-    for (const glm::vec3& vertex : vertexArray) {
-        // Apply scaling and translation to each vertex
-        glm::vec3 transformedVertex = vertex * scale;
-        transformedVertex.x += offset_x;
-        transformedVertex.y += offset_y;
-        transformedArray.push_back(transformedVertex);
-    }
-
-    return transformedArray;
-}
-
-void printVertexArray(const std::vector<glm::vec3>& vertexArray) {
-    std::cout << "Vertex Array Contents:" << std::endl;
-    for (const glm::vec3& vertex : vertexArray) {
-        std::cout << "Vertex: (" << vertex.x << ", " << vertex.y << ", " << vertex.z << ")" << std::endl;
     }
 }
 
@@ -110,39 +94,62 @@ int main() {
     if (!init()) { return 1; }
     
     // Read from .obj file and store the vertices/faces
-    std::vector<Vertex> vertices;
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normals;
     std::vector<Face> faces;
 
     bool loadModel = true;
     if (loadModel) {
-        if (!ObjLoader::LoadObj("../models/Lab3_Ship.obj", vertices, faces)) {
-            SDL_Log("Failed to load .obj file.");
-            return 1;
-        } else {
-            SDL_Log("Loaded .obj file successfully.");
-        }
+        loadOBJ("../models/Lab3_Ship.obj", vertices, normals, faces);
     }
 
-    std::vector<glm::vec3> VBO = setupVertexArray(vertices, faces);
+    Camera camera = {glm::vec3(0, 0, -5), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)};
+    const float cameraMovementSpeed = 0.1f;
+    const float horizontalRotationSpeed = 0.02f;
+
+    std::vector<glm::vec3> VBO = setupVertexBufferObject(vertices, normals, faces);
 
     float rotation = 0.0f;
+    Uint32 frameStart, frameTime;
 
     // Render loop
     bool quit = false;
     SDL_Event event;
     while (!quit) {
+        frameStart = SDL_GetTicks();
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 quit = true;
             }
+            // Camera movement
+            if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_w) {
+                    // "S" key was pressed
+                    camera.MoveForward(cameraMovementSpeed);
+                }
+                else if (event.key.keysym.sym == SDLK_s) {
+                    // "W" key was pressed
+                    camera.MoveBackward(cameraMovementSpeed);
+                }
+                else if (event.key.keysym.sym == SDLK_a) {
+                    // Rotate the camera left (orbit)
+                    camera.Rotate(horizontalRotationSpeed);
+                }
+                else if (event.key.keysym.sym == SDLK_d) {
+                    // Rotate the camera right (orbit)
+                    camera.Rotate(-horizontalRotationSpeed);
+                }
+            }
         }
+        
 
         // Clear the buffer
         clear();
 
-        // Calculate matrixes dor rendering
-        uniforms.model = createModelMatrix(glm::vec3(0.2, 0.2, 0.2), glm::vec3(0, 0, 0), rotation += 0.01f);
-        uniforms.view = createViewMatrix();
+        // Calculate matrixes for rendering
+        uniforms.model = createModelMatrix(glm::vec3(0.2), glm::vec3(0, 0, 0), rotation += 0.02f);
+        // uniforms.model = createModelMatrix(glm::vec3(0.8), glm::vec3(0, 0, 0), 0.0f); // No rotation
+        uniforms.view = createViewMatrix(camera);
         uniforms.projection = createProjectionMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
         uniforms.viewport = createViewportMatrix(SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -152,8 +159,14 @@ int main() {
         // Present the framebuffer to the screen
         SDL_RenderPresent(renderer);
 
-        // Delay to limit the frame rate
-        SDL_Delay(1000/60);
+        frameTime = SDL_GetTicks() - frameStart;
+
+        // Calculate frames per second and update window title
+        if (frameTime > 0) {
+            std::ostringstream titleStream;
+            titleStream << "FPS: " << static_cast<int>(1000.0 / frameTime);  // Milliseconds to seconds
+            SDL_SetWindowTitle(window, titleStream.str().c_str());
+        }
     }
 
     SDL_DestroyRenderer(renderer);
