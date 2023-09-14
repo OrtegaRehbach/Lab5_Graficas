@@ -245,7 +245,7 @@ glm::vec3 barycentricCoordinates(const glm::vec3& P, const glm::vec3& A, const g
 }
 
 bool isInsideTriangle(const glm::vec3& barycentricCoordinates) {
-    float epsilon = 1e-10;
+    float epsilon = 1e-8;
     return (
         barycentricCoordinates.x <= 1 && barycentricCoordinates.x >= epsilon &&
         barycentricCoordinates.y <= 1 && barycentricCoordinates.y >= epsilon &&
