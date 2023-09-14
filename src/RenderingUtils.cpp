@@ -105,15 +105,12 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const i
                 float interpolatedZ = a.position.z * u + b.position.z * v + c.position.z * w;
                 P.z = interpolatedZ;
 
-                // Calculate normal
-                glm::vec3 normal = glm::normalize(a.normal * u + b.normal * v + c.normal * w); 
+                // Interpolate normal
+                glm::vec3 normal = glm::normalize(a.normal * u + b.normal * v + c.normal * w);
                 
-                // Calculate light direction
-                glm::vec3 lightDirection = glm::normalize(L - P);
-
                 // Calculate intensity
                 float intensity = glm::dot(normal, glm::normalize(L));
-                intensity = (intensity < 0) ? abs(intensity) : 0.0f;    // Truncate the value of normals facing opposite of L
+                intensity = (intensity < 0) ? abs(intensity) : 0.0f;    // Truncate the value for normals facing opposite of L
 
                 // Backface culling
                 if (intensity <= 0)
