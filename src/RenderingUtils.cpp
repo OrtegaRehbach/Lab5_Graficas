@@ -92,7 +92,7 @@ std::vector<Fragment> getTriangleFragments(Vertex a, Vertex b, Vertex c, const i
 
     for (int y = minY; y <= maxY; y++) {
         for (int x = minX; x <= maxX; x++) {
-            if (x < 0 || y < 0 || y > SCREEN_HEIGHT || x > SCREEN_WIDTH)
+            if (x < 0 || y < 0 || y >= SCREEN_HEIGHT || x >= SCREEN_WIDTH)
             continue;
 
             glm::vec3 P(x, y, 0);
